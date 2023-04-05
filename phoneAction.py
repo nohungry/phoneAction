@@ -7,22 +7,14 @@ import time
 
 def adbWakeUp():
     subprocess.check_output(['adb', 'devices'])
-
     # waiting adb wakeup time
     time.sleep(10)
-
-def monitorUp(device):
-    device.shell("input keyevent 26")
-    time.sleep(3)
-    device.shell("input keyevent 82")
 
 def connectDevice(serial=None):
     # Default is "127.0.0.1" and 5037
     client = AdbClient(host="127.0.0.1", port=5037)
-
     # connect list of devices
     devices = client.devices()
-    
     # get current device
     if serial != None:
         for tempDevice in devices:
@@ -36,10 +28,17 @@ def connectDevice(serial=None):
             device = devices[0]
         return device
 
-# @TODO 確認下載本地path & 要如何命名下載圖片(maybe+datetime)
-def screenshot(device, filename):
+def monitorUp(device):
+    # phone lightup
+    device.shell("input keyevent 26")
+    time.sleep(3)
+    # phone unlock
+    device.shell("input keyevent 82")
+    time.sleep(3)
+
+def screenShot(device, filename):
     # 獲取當前手機的snapshot
-    screenShot = device.screencap()
+    snapShot = device.screencap()
     # 獲取當前資料夾位置
     currentDir = os.getcwd()
     # 組合成特定名稱的資料夾
@@ -50,13 +49,19 @@ def screenshot(device, filename):
     temp = os.path.join(filePath, r"screen_" + nowTime + ".png")
     # 開始寫入到本機對應的資料夾
     with open(temp, "wb")as f:
-        f.write(screenShot)
+        f.write(snapShot)
 
     return temp
 
+# @TODO 後續在實作這個錄影
+def screenRecord(deivce, filename):
+    pass
+
+# testing code
 if __name__ == '__main__':
     # serial 'f130295' 裝置序號
     serial = "f130295"
     adbWakeUp()
     device = connectDevice(serial=serial)
     monitorUp(device)
+    screenShot(device, "Deepsea")
